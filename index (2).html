@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>이름 관상소 — 이름으로 보는 얼굴</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Noto+Serif+KR:wght@400;500;600;700&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sage-1: #eef0e2;
+    --sage-2: #f7f1e4;
+    --ink: #2c2c24;
+    --plum: #9c5f76;
+    --plum-deep: #7a4359;
+    --brass: #bd9a3f;
+    --panel: #fbf8ee;
+    --line: rgba(44,44,36,0.14);
+  }
+  *{ box-sizing:border-box; }
+  html,body{
+    margin:0; min-height:100vh;
+    background:
+      radial-gradient(ellipse at 15% 0%, rgba(157,95,118,0.10), transparent 45%),
+      radial-gradient(ellipse at 90% 90%, rgba(189,154,63,0.14), transparent 50%),
+      linear-gradient(180deg, var(--sage-2), var(--sage-1));
+    color: var(--ink);
+    font-family:'IBM Plex Sans KR', sans-serif;
+  }
+  .wrap{
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 56px 20px 80px;
+    display:flex; flex-direction:column; align-items:center;
+  }
+  header.hero{ text-align:center; max-width:460px; margin-bottom:36px; }
+  .mark{ width:30px; height:30px; margin-bottom:12px; opacity:0.85; }
+  h1{
+    font-family:'Cormorant Garamond', 'Noto Serif KR', serif;
+    font-style: italic;
+    font-weight: 600;
+    font-size: clamp(30px, 6vw, 46px);
+    margin: 0 0 10px;
+    color: var(--plum-deep);
+  }
+  header.hero p{
+    font-family:'Noto Serif KR', serif;
+    font-size: 14px;
+    line-height: 1.8;
+    color: rgba(44,44,36,0.62);
+    margin:0;
+  }
+
+  .panel{
+    width:100%;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 32px 30px;
+    box-shadow: 0 24px 50px -30px rgba(44,44,36,0.35);
+  }
+  .panel-title{
+    text-align:center;
+    font-family:'Noto Serif KR', serif;
+    font-weight:700;
+    font-size: 16px;
+    color: var(--plum-deep);
+    margin: 0 0 4px;
+  }
+  .panel-sub{
+    text-align:center;
+    font-size: 12px;
+    color: rgba(44,44,36,0.5);
+    font-family:'Noto Serif KR', serif;
+    margin: 0 0 24px;
+  }
+
+  .field label{
+    display:block;
+    font-family:'Noto Serif KR', serif;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 7px;
+  }
+  .field input{
+    width:100%;
+    font-size: 15px;
+    padding: 11px 13px;
+    border: 1px solid rgba(44,44,36,0.22);
+    background:#fff;
+    border-radius: 2px;
+    color: var(--ink);
+    outline:none;
+    font-family:'IBM Plex Sans KR', sans-serif;
+    transition: border-color .2s ease, box-shadow .2s ease;
+  }
+  .field input:focus{
+    border-color: var(--plum);
+    box-shadow: 0 0 0 3px rgba(156,95,118,0.14);
+  }
+
+  .go-btn{
+    width:100%;
+    margin-top: 16px;
+    padding: 13px 16px;
+    font-family:'Noto Serif KR', serif;
+    font-weight:600;
+    font-size: 15px;
+    color: #fff;
+    background: linear-gradient(180deg, var(--plum), var(--plum-deep));
+    border:none;
+    border-radius: 2px;
+    cursor:pointer;
+    box-shadow: 0 8px 18px -8px rgba(122,67,89,0.55);
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .go-btn:hover{ transform: translateY(-1px); }
+  .go-btn:active{ transform: translateY(0) scale(0.99); }
+
+  .error-msg{
+    font-size: 12.5px;
+    color: var(--plum-deep);
+    margin-top: 8px;
+    min-height: 16px;
+    font-family:'Noto Serif KR', serif;
+  }
+
+  .result{ width:100%; margin-top: 28px; display:none; }
+  .result.show{ display:block; }
+
+  .frame-wrap{
+    display:flex; justify-content:center;
+    margin-bottom: 18px;
+    opacity:0; transform: translateY(10px) scale(0.97);
+    transition: opacity .6s ease, transform .6s ease;
+  }
+  .frame-wrap.in{ opacity:1; transform:none; }
+  .frame{
+    width: 230px; height: 280px;
+    border-radius: 50% / 42%;
+    background: #fff;
+    border: 3px solid var(--brass);
+    box-shadow:
+      0 0 0 6px var(--sage-2),
+      0 0 0 7px var(--line),
+      0 20px 40px -20px rgba(44,44,36,0.4);
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+  }
+  .frame svg{ width:100%; height:100%; }
+
+  .result-name{
+    text-align:center;
+    font-family:'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 22px;
+    color: var(--plum-deep);
+    margin-bottom: 18px;
+  }
+
+  .reading-list{ list-style:none; margin:0 0 8px; padding:0; }
+  .reading-list li{
+    display:flex; gap:10px; align-items:flex-start;
+    font-family:'Noto Serif KR', serif;
+    font-size: 14px;
+    line-height: 1.7;
+    padding: 9px 0;
+    border-bottom: 1px dashed var(--line);
+    opacity:0; transform: translateY(6px);
+    transition: opacity .5s ease, transform .5s ease;
+  }
+  .reading-list li.in{ opacity:1; transform:none; }
+  .reading-list li:last-child{ border-bottom:none; }
+  .reading-list li .dot{
+    color: var(--brass);
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .summary-box{
+    margin-top: 16px;
+    padding: 16px 18px;
+    border: 1px dashed rgba(189,154,63,0.55);
+    border-radius: 3px;
+    font-family:'Noto Serif KR', serif;
+    font-size: 13.5px;
+    line-height: 1.75;
+    color: rgba(44,44,36,0.78);
+    opacity:0; transform: translateY(8px);
+    transition: opacity .55s ease, transform .55s ease;
+  }
+  .summary-box.in{ opacity:1; transform:none; }
+  .summary-box b{ color: var(--plum-deep); }
+
+  .retry-line{
+    text-align:center; margin-top:18px; font-size:12px;
+    color: rgba(44,44,36,0.45);
+    opacity:0; transition: opacity .6s ease;
+  }
+  .retry-line.in{ opacity:1; }
+  .retry-line button{
+    background:none; border:none; color: var(--plum-deep);
+    text-decoration: underline; cursor:pointer; font-size:12px;
+    font-family:'IBM Plex Sans KR', sans-serif; padding:0;
+  }
+
+  footer{
+    margin-top: 40px; font-size:11px; color: rgba(44,44,36,0.4);
+    text-align:center; max-width:400px; line-height:1.7;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <svg class="mark" viewBox="0 0 30 30" fill="none">
+      <ellipse cx="15" cy="15" rx="12" ry="13.5" stroke="#bd9a3f" stroke-width="1"/>
+      <circle cx="11" cy="14" r="1.4" fill="#7a4359"/>
+      <circle cx="19" cy="14" r="1.4" fill="#7a4359"/>
+      <path d="M11 19 Q15 22 19 19" stroke="#7a4359" stroke-width="1" fill="none" stroke-linecap="round"/>
+    </svg>
+    <h1>이름 관상소</h1>
+    <p>이름 석 자에는 얼굴이 숨어 있다고 합니다. 이름을 적으면 그 안에 깃든 얼굴을 그려 관상을 봐드립니다.</p>
+  </header>
+
+  <div class="panel">
+    <p class="panel-title">방 명 록</p>
+    <p class="panel-sub">— 관상을 그리기 위한 이름을 적어주세요 —</p>
+    <div class="field">
+      <label for="nameInput">이름</label>
+      <input type="text" id="nameInput" placeholder="예: 이서연" maxlength="20">
+    </div>
+    <button class="go-btn" id="goBtn">관상 그리기</button>
+    <div class="error-msg" id="errorMsg"></div>
+  </div>
+
+  <div class="result" id="result">
+    <div class="frame-wrap" id="frameWrap">
+      <div class="frame" id="frame"></div>
+    </div>
+    <div class="result-name" id="resultName">—</div>
+    <ul class="reading-list" id="readingList"></ul>
+    <div class="summary-box" id="summaryBox">
+      <b>총평.</b> <span id="summaryText"></span>
+    </div>
+    <div class="retry-line" id="retryLine">
+      이름이 같으면 관상도 항상 같습니다 · <button id="retryBtn">다시 그리기</button>
+    </div>
+  </div>
+
+  <footer>이 관상은 이름 글자를 바탕으로 무작위로 그려낸 재미용 콘텐츠이며, 실제 생김새나 성격과는 무관합니다.</footer>
+</div>
+
+<script>
+  // ---------- 시드 난수 ----------
+  function hashString(str){
+    let h = 2166136261;
+    for(let i=0;i<str.length;i++){
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return h >>> 0;
+  }
+  function mulberry32(seed){
+    return function(){
+      seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function pickIndex(rand, n){ return Math.floor(rand()*n); }
+
+  // ---------- 색상 팔레트 ----------
+  const SKIN_TONES  = ["#f6e0c9","#f0cda3","#e0ac7c","#c78d5c","#a8683e","#7a4a2c"];
+  const HAIR_COLORS = ["#2b2420","#4a3222","#7a5230","#b58a3e","#8c8c8c","#5c4a6e","#6e3f3f"];
+  const EYE_COLORS  = ["#3a2a1e","#4a3323","#5c6e4a","#3f5c6e","#6e5c3f"];
+  const CLOTHES     = ["#7a4359","#4a5c46","#3f4a5c","#8c6a3f","#5c4a6e","#6e4a4a"];
+  const BG_TINTS    = ["#f4ede0","#eaf0e4","#f0e6ec","#eae6f0","#f0ece0"];
+
+  // ---------- 얼굴 부위별 관상평 ----------
+  const FACE_SHAPES = ["round","oval","heart"];
+  const FACE_TEXT = {
+    round: "동글동글한 얼굴형이라 편안하고 다정한 인상을 주는 상입니다.",
+    oval:  "갸름한 얼굴형으로 또렷하고 야무진 인상을 주는 상입니다.",
+    heart: "갸름한 턱선이 매력적인, 이야기가 궁금해지는 상입니다."
+  };
+
+  const HAIR_STYLES = ["bald","short","curly","long","bun"];
+  const HAIR_TEXT = {
+    bald:  "시원하게 드러난 이마가 지혜로워 보이는 상입니다.",
+    short: "단정한 머리카락이 신뢰를 주는 상입니다.",
+    curly: "곱슬거리는 머리카락에 개성이 묻어나는 상입니다.",
+    long:  "부드럽게 흘러내린 머리카락이 온화한 인상을 더하는 상입니다.",
+    bun:   "단정하게 틀어 올린 머리가 야무진 인상을 주는 상입니다."
+  };
+
+  const EYEBROW_STYLES = ["straight","arched","thick","thin"];
+  const EYEBROW_TEXT = {
+    straight: "일자로 뻗은 눈썹이라 솔직한 성격일 상입니다.",
+    arched:   "둥글게 휜 눈썹이 다정한 인상을 주는 상입니다.",
+    thick:    "짙고 선명한 눈썹이 결단력 있어 보이는 상입니다.",
+    thin:     "가늘게 뻗은 눈썹이 섬세한 인상을 주는 상입니다."
+  };
+
+  const EYE_STYLES = ["round","almond","sleepy","wide"];
+  const EYE_TEXT = {
+    round:  "동그란 눈매라 호기심이 많아 보이는 상입니다.",
+    almond: "아몬드형 눈매가 지적인 인상을 주는 상입니다.",
+    sleepy: "그윽하게 처진 눈매가 여유로워 보이는 상입니다.",
+    wide:   "크고 또렷한 눈이 표정을 풍부하게 만드는 상입니다."
+  };
+
+  const MOUTH_STYLES = ["smile","neutral","smirk","open"];
+  const MOUTH_TEXT = {
+    smile:   "살짝 올라간 입꼬리가 웃는 상입니다.",
+    neutral: "차분한 입매가 신중한 인상을 주는 상입니다.",
+    smirk:   "장난기 있는 입매가 매력 포인트인 상입니다.",
+    open:    "생기 있는 표정이 활발한 인상을 주는 상입니다."
+  };
+
+  const ACCESSORY_TEXT = {
+    glasses:  "안경 너머로 총명한 눈빛이 느껴지는 상입니다.",
+    mole:     "은은한 점 하나가 매력 포인트가 되는 상입니다.",
+    freckles: "잔잔한 주근깨가 사랑스러운 인상을 더하는 상입니다.",
+    earrings: "귀걸이가 화사함을 더해주는 상입니다."
+  };
+
+  const SUMMARY_TEMPLATES = [
+    "{name} 님은 처음 만난 자리에서도 은근히 시선을 끄는 얼굴을 지녔습니다. 웃을 때 진가가 드러나는 상이니, 오늘은 자주 웃어보세요.",
+    "{name} 님의 얼굴에는 차분함과 장난기가 함께 숨어 있습니다. 상황에 따라 두 얼굴을 오가는 매력이 있는 상입니다.",
+    "{name} 님은 표정이 곧 마음인 얼굴을 지녔습니다. 숨기려 해도 다 드러나니, 오늘은 솔직하게 지내보는 것도 좋겠습니다.",
+    "{name} 님의 관상에는 은근한 뚝심이 담겨 있습니다. 조용해 보여도 할 말은 하는 상입니다.",
+    "{name} 님은 시간이 지날수록 매력이 짙어지는 얼굴입니다. 첫인상보다 두 번째 만남이 더 좋은 상입니다.",
+    "{name} 님의 얼굴에는 다정함이 배어 있습니다. 낯선 사람에게도 곧잘 정을 붙이는 상입니다."
+  ];
+
+  // ---------- SVG 부위 생성 ----------
+  function faceShapePath(type){
+    if(type === "round")
+      return `<ellipse cx="130" cy="158" rx="70" ry="68" />`;
+    if(type === "oval")
+      return `<ellipse cx="130" cy="162" rx="58" ry="85" />`;
+    // heart
+    return `<path d="M62,140 C62,95 90,68 130,68 C170,68 198,95 198,140
+             C198,176 174,206 150,226 C142,232 130,240 130,240
+             C130,240 118,232 110,226 C86,206 62,176 62,140 Z"/>`;
+  }
+
+  function hairBackSVG(style, hairColor){
+    if(style === "long"){
+      return `
+        <path d="M64,112 C38,145 36,225 46,300 L88,300 C80,225 76,155 92,118 Z" fill="${hairColor}"/>
+        <path d="M196,112 C222,145 224,225 214,300 L172,300 C180,225 184,155 168,118 Z" fill="${hairColor}"/>`;
+    }
+    if(style === "bun"){
+      return `<circle cx="130" cy="64" r="16" fill="${hairColor}"/>`;
+    }
+    return "";
+  }
+
+  function hairFrontSVG(style, hairColor){
+    const cap = `M62,148 C56,88 90,52 130,52 C170,52 204,88 198,148
+                 C198,120 184,98 160,94 C150,110 140,116 130,116
+                 C120,116 110,110 100,94 C76,98 62,120 62,148 Z`;
+    if(style === "bald"){
+      return `<ellipse cx="112" cy="92" rx="18" ry="9" fill="#ffffff" opacity="0.25"/>`;
+    }
+    if(style === "curly"){
+      let circles = "";
+      const cxs = [72,90,108,126,144,162,180,196];
+      const cys = [128,104,90,84,84,90,104,128];
+      const rs  = [15,17,18,19,19,18,17,15];
+      for(let i=0;i<cxs.length;i++){
+        circles += `<circle cx="${cxs[i]}" cy="${cys[i]}" r="${rs[i]}" fill="${hairColor}"/>`;
+      }
+      return circles;
+    }
+    // short, long, bun all share the same cap silhouette on top
+    return `<path d="${cap}" fill="${hairColor}"/>`;
+  }
+
+  function eyeSVG(cx, style, eyeColor){
+    const cy = 145;
+    let rx = 11, ry = 10;
+    if(style === "round"){ rx=11; ry=11; }
+    if(style === "almond"){ rx=13; ry=7; }
+    if(style === "sleepy"){ rx=12; ry=5; }
+    if(style === "wide"){ rx=14; ry=13; }
+
+    return `
+      <ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="#ffffff" stroke="#2c2c24" stroke-width="1.4"/>
+      <circle cx="${cx}" cy="${cy}" r="${Math.min(ry,6)}" fill="${eyeColor}"/>
+      <circle cx="${cx}" cy="${cy}" r="${Math.min(ry,6)*0.4}" fill="#141414"/>
+      <circle cx="${cx-2}" cy="${cy-2}" r="1.3" fill="#ffffff"/>
+    `;
+  }
+
+  function eyebrowSVG(cx, style){
+    const y = 126;
+    let d, w;
+    if(style === "straight"){ d = `M${cx-14},${y} L${cx+14},${y-2}`; w=4; }
+    else if(style === "arched"){ d = `M${cx-14},${y+2} Q${cx},${y-10} ${cx+14},${y}`; w=3; }
+    else if(style === "thick"){ d = `M${cx-15},${y} L${cx+15},${y-2}`; w=7; }
+    else { d = `M${cx-13},${y-2} L${cx+13},${y-4}`; w=2; }
+    return `<path d="${d}" stroke="#2c2320" stroke-width="${w}" stroke-linecap="round" fill="none"/>`;
+  }
+
+  function noseSVG(skinShadow){
+    return `<path d="M126,150 L122,175 Q130,181 138,175" stroke="${skinShadow}" stroke-width="2" fill="none" stroke-linecap="round"/>`;
+  }
+
+  function mouthSVG(style){
+    const cx = 130, cy = 198;
+    if(style === "smile")
+      return `<path d="M${cx-15},${cy-3} Q${cx},${cy+11} ${cx+15},${cy-3}" stroke="#6e3f3f" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+    if(style === "neutral")
+      return `<path d="M${cx-13},${cy} L${cx+13},${cy}" stroke="#6e3f3f" stroke-width="3" stroke-linecap="round"/>`;
+    if(style === "smirk")
+      return `<path d="M${cx-13},${cy} Q${cx-1},${cy+7} ${cx+14},${cy-6}" stroke="#6e3f3f" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+    return `<ellipse cx="${cx}" cy="${cy+2}" rx="9" ry="7" fill="#6e3f3f"/>`;
+  }
+
+  function glassesSVG(){
+    return `
+      <circle cx="108" cy="145" r="17" fill="none" stroke="#2c2c24" stroke-width="2.2"/>
+      <circle cx="152" cy="145" r="17" fill="none" stroke="#2c2c24" stroke-width="2.2"/>
+      <path d="M125,145 L135,145" stroke="#2c2c24" stroke-width="2.2"/>
+      <path d="M91,142 L80,138" stroke="#2c2c24" stroke-width="2"/>
+      <path d="M169,142 L180,138" stroke="#2c2c24" stroke-width="2"/>
+    `;
+  }
+  function moleSVG(){
+    return `<circle cx="146" cy="204" r="1.8" fill="#4a352c"/>`;
+  }
+  function frecklesSVG(){
+    const pts = [[92,168],[98,175],[88,178],[168,168],[162,175],[172,178]];
+    return pts.map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="1.3" fill="#a8683e" opacity="0.55"/>`).join("");
+  }
+  function earringsSVG(){
+    return `
+      <circle cx="64" cy="182" r="3" fill="#bd9a3f"/>
+      <circle cx="196" cy="182" r="3" fill="#bd9a3f"/>
+    `;
+  }
+
+  function buildAvatar(seed){
+    const rand = mulberry32(seed);
+
+    const faceShape = FACE_SHAPES[pickIndex(rand, FACE_SHAPES.length)];
+    const hairStyle  = HAIR_STYLES[pickIndex(rand, HAIR_STYLES.length)];
+    const eyebrow    = EYEBROW_STYLES[pickIndex(rand, EYEBROW_STYLES.length)];
+    const eyeStyle   = EYE_STYLES[pickIndex(rand, EYE_STYLES.length)];
+    const mouthStyle = MOUTH_STYLES[pickIndex(rand, MOUTH_STYLES.length)];
+
+    const skin  = SKIN_TONES[pickIndex(rand, SKIN_TONES.length)];
+    const hairC = HAIR_COLORS[pickIndex(rand, HAIR_COLORS.length)];
+    const eyeC  = EYE_COLORS[pickIndex(rand, EYE_COLORS.length)];
+    const cloth = CLOTHES[pickIndex(rand, CLOTHES.length)];
+    const bg    = BG_TINTS[pickIndex(rand, BG_TINTS.length)];
+
+    const hasGlasses  = rand() < 0.32;
+    const hasMole     = rand() < 0.28;
+    const hasFreckles = rand() < 0.3;
+    const hasEarrings = rand() < 0.35;
+
+    const skinShadow = "#7a4a2c";
+
+    const svg = `
+      <svg viewBox="0 0 260 320" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="0" width="260" height="320" fill="${bg}"/>
+        <path d="M40,320 L92,236 L168,236 L220,320 Z" fill="${cloth}"/>
+        ${hairBackSVG(hairStyle, hairC)}
+        <rect x="108" y="212" width="44" height="48" rx="10" fill="${skin}"/>
+        <ellipse cx="63" cy="162" rx="9" ry="15" fill="${skin}"/>
+        <ellipse cx="197" cy="162" rx="9" ry="15" fill="${skin}"/>
+        <g fill="${skin}">${faceShapePath(faceShape)}</g>
+        ${hasFreckles ? frecklesSVG() : ""}
+        ${eyebrowSVG(108, eyebrow)}
+        ${eyebrowSVG(152, eyebrow)}
+        ${eyeSVG(108, eyeStyle, eyeC)}
+        ${eyeSVG(152, eyeStyle, eyeC)}
+        ${noseSVG(skinShadow)}
+        ${mouthSVG(mouthStyle)}
+        ${hasMole ? moleSVG() : ""}
+        ${hairFrontSVG(hairStyle, hairC)}
+        ${hasGlasses ? glassesSVG() : ""}
+        ${hasEarrings ? earringsSVG() : ""}
+      </svg>
+    `;
+
+    const readings = [
+      FACE_TEXT[faceShape],
+      HAIR_TEXT[hairStyle],
+      EYEBROW_TEXT[eyebrow],
+      EYE_TEXT[eyeStyle],
+      MOUTH_TEXT[mouthStyle]
+    ];
+    if(hasGlasses) readings.push(ACCESSORY_TEXT.glasses);
+    if(hasMole) readings.push(ACCESSORY_TEXT.mole);
+    if(hasFreckles) readings.push(ACCESSORY_TEXT.freckles);
+    if(hasEarrings) readings.push(ACCESSORY_TEXT.earrings);
+
+    const summary = SUMMARY_TEMPLATES[pickIndex(rand, SUMMARY_TEMPLATES.length)];
+
+    return { svg, readings, summary };
+  }
+
+  // ---------- 실행 ----------
+  function runReading(){
+    const nameEl = document.getElementById('nameInput');
+    const errEl = document.getElementById('errorMsg');
+    const name = nameEl.value.trim();
+    if(!name){
+      errEl.textContent = '이름을 적어주세요.';
+      nameEl.focus();
+      return;
+    }
+    errEl.textContent = '';
+
+    const seed = hashString(name);
+    const { svg, readings, summary } = buildAvatar(seed);
+
+    document.getElementById('frame').innerHTML = svg;
+    document.getElementById('resultName').textContent = `${name} 님의 얼굴`;
+
+    const list = document.getElementById('readingList');
+    list.innerHTML = '';
+    readings.forEach(text => {
+      const li = document.createElement('li');
+      li.innerHTML = `<span class="dot">·</span><span>${text}</span>`;
+      list.appendChild(li);
+    });
+
+    document.getElementById('summaryText').textContent = summary.replace('{name}', name);
+
+    document.getElementById('result').classList.add('show');
+
+    document.querySelectorAll('.frame-wrap, .reading-list li, .summary-box, .retry-line')
+      .forEach(el => el.classList.remove('in'));
+
+    let delay = 100;
+    setTimeout(() => document.getElementById('frameWrap').classList.add('in'), delay);
+    delay += 400;
+    document.querySelectorAll('.reading-list li').forEach((el, i) => {
+      setTimeout(() => el.classList.add('in'), delay + i*140);
+    });
+    delay += readings.length*140 + 200;
+    setTimeout(() => document.getElementById('summaryBox').classList.add('in'), delay);
+    delay += 300;
+    setTimeout(() => document.getElementById('retryLine').classList.add('in'), delay);
+
+    document.getElementById('result').scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }
+
+  document.getElementById('goBtn').addEventListener('click', runReading);
+  document.getElementById('retryBtn').addEventListener('click', runReading);
+  document.getElementById('nameInput').addEventListener('keydown', (e) => {
+    if(e.key === 'Enter') runReading();
+  });
+</script>
+</body>
+</html>
